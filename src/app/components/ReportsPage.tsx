@@ -81,6 +81,8 @@ const ACTION_COLORS: Record<string, { bg: string; text: string }> = {
   Created: { bg: 'bg-primary/10',text: 'text-primary' },
 };
 
+const DEFAULT_ACTION_COLORS = { bg: 'bg-muted', text: 'text-muted-foreground' };
+
 const TARGET_COLORS: Record<string, string> = {
   'Therapy Lead':        'bg-muted border border-border text-muted-foreground',
   'Project Lead':   'bg-blue-50 text-blue-700',
@@ -88,13 +90,25 @@ const TARGET_COLORS: Record<string, string> = {
   'Project':        'bg-primary/10 text-primary',
 };
 
+const DEFAULT_TARGET_COLORS = 'bg-muted text-muted-foreground';
+
+function toUniqueSortedValues<T extends string>(values: T[]): T[] {
+  return Array.from(new Set(values)).sort();
+}
+
+const ALL_ACTIONS = toUniqueSortedValues(MOCK_AUDIT.map((entry) => entry.action));
+const ALL_TYPES = toUniqueSortedValues(MOCK_AUDIT.map((entry) => entry.targetType));
+const ALL_TAS = toUniqueSortedValues(
+  MOCK_AUDIT.map((entry) => entry.therapeuticArea).filter(Boolean) as string[]
+);
+
 function ActionBadge({ action }: { action: string }) {
-  const colors = ACTION_COLORS[action] ?? { bg: 'bg-muted', text: 'text-muted-foreground' };
+  const colors = ACTION_COLORS[action] ?? DEFAULT_ACTION_COLORS;
   return <span className={`px-2 py-0.5 rounded-[var(--radius-tag)] text-xs ${colors.bg} ${colors.text}`}>{action}</span>;
 }
 
 function TypeBadge({ type }: { type: string }) {
-  const colors = TARGET_COLORS[type] ?? 'bg-muted text-muted-foreground';
+  const colors = TARGET_COLORS[type] ?? DEFAULT_TARGET_COLORS;
   return <span className={`px-2 py-0.5 rounded-[var(--radius-tag)] text-xs ${colors}`}>{type}</span>;
 }
 
@@ -117,11 +131,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  const allActions = Array.from(new Set(MOCK_AUDIT.map(e => e.action))).sort();
-  const allTypes   = Array.from(new Set(MOCK_AUDIT.map(e => e.targetType))).sort();
-  const allTAs     = Array.from(new Set(MOCK_AUDIT.map(e => e.therapeuticArea).filter(Boolean))).sort() as string[];
-
-  const hasActiveFilters = searchQuery || filterAction || filterType || filterTA || dateFrom || dateTo;
+  const hasActiveFilters = Boolean(searchQuery || filterAction || filterType || filterTA || dateFrom || dateTo);
 
   const filtered = MOCK_AUDIT.filter(entry => {
     const q = searchQuery.toLowerCase();
@@ -261,7 +271,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
                         className="pl-8 pr-6 py-2 bg-input-background border border-border rounded-[var(--radius)] text-foreground text-sm appearance-none cursor-pointer"
                       >
                         <option value="">All Actions</option>
-                        {allActions.map(a => <option key={a} value={a}>{a}</option>)}
+                        {ALL_ACTIONS.map(a => <option key={a} value={a}>{a}</option>)}
                       </select>
                     </div>
 
@@ -273,7 +283,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
                         className="px-3 py-2 bg-input-background border border-border rounded-[var(--radius)] text-foreground text-sm appearance-none cursor-pointer"
                       >
                         <option value="">All Types</option>
-                        {allTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                        {ALL_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                       </select>
                     </div>
 
@@ -285,7 +295,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
                         className="px-3 py-2 bg-input-background border border-border rounded-[var(--radius)] text-foreground text-sm appearance-none cursor-pointer"
                       >
                         <option value="">All TAs</option>
-                        {allTAs.map(t => <option key={t} value={t}>{t}</option>)}
+                        {ALL_TAS.map(t => <option key={t} value={t}>{t}</option>)}
                       </select>
                     </div>
                   </div>

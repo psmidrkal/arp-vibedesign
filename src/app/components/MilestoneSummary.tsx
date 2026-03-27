@@ -1,7 +1,6 @@
 import TopNav from "./shared/TopNav";
-import { User, Mail, MessageSquare, HelpCircle, Home, FolderOpen, ClipboardList, Settings, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 import { useState } from "react";
-import svgPaths from '@/imports/svg-6hwcrc560a';
 import FolderTree from "./shared/FolderTree";
 import { toast, ToastProvider } from "./shared/Toast";
 
@@ -15,53 +14,6 @@ interface MilestoneSummaryProps {
   onNavigate: (screen: 'home' | 'milestone-details' | 'collaborators-approvers' | 'repository-setup' | 'milestone-summary' | 'my-studies' | 'my-tasks' | 'admin') => void;
   onSubmit: () => void;
   formData?: any;
-}
-
-function IconWhite() {
-  return (
-    <div className="relative shrink-0 size-[20px]">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 35.0001 35">
-        <g>
-          <path clipRule="evenodd" d={svgPaths.p176e6880} fill="white" fillRule="evenodd" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function NavItem({ children, active = false, onClick }: { children: React.ReactNode; active?: boolean; onClick?: () => void }) {
-  return (
-    <a 
-      href="#" 
-      onClick={(e) => {
-        e.preventDefault();
-        onClick?.();
-      }}
-      className={`text-primary-foreground hover:opacity-80 transition-opacity ${active ? 'border-b-2 border-primary-foreground' : ''}`}
-    >
-      {children}
-    </a>
-  );
-}
-
-function NavItemWithBadge({ children, badge, active = false, onClick }: { children: React.ReactNode; badge?: number; active?: boolean; onClick?: () => void }) {
-  return (
-    <a 
-      href="#" 
-      onClick={(e) => {
-        e.preventDefault();
-        onClick?.();
-      }}
-      className={`text-primary-foreground hover:opacity-80 transition-opacity relative ${active ? 'border-b-2 border-primary-foreground' : ''}`}
-    >
-      {children}
-      {badge !== undefined && badge > 0 && (
-        <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
-          {badge}
-        </span>
-      )}
-    </a>
-  );
 }
 
 function Breadcrumbs({ onNavigate }: { onNavigate: (screen: 'home' | 'milestone-details' | 'collaborators-approvers' | 'repository-setup' | 'milestone-summary' | 'my-studies' | 'my-tasks' | 'admin') => void }) {
@@ -124,23 +76,6 @@ export default function MilestoneSummary({ onNavigate, onSubmit, formData }: Mil
     }, 2000);
   };
 
-  // Mock data for folders and libraries
-  const dataFolders = [
-    'adlb', 'adae', 'adcm', 'addv', 'adeg', 'ademg', 'adex', 'adlbh', 'admh', 
-    'adpc', 'adpp', 'adqs', 'adsl', 'adtte', 'advs', 'ae', 'cm', 'dm', 'ds', 
-    'ex', 'lb', 'mh', 'sv', 'vs'
-  ];
-  
-  const codeFolders = ['adhoc', 'macrolib', 'pgmanual', 'pgmsetup', 'test'];
-  
-  const artifactFolders = [
-    'analysis-plan', 'clinical-study-report', 'data-review', 'define-xml', 
-    'efficacy-tables', 'figures', 'graphs', 'interim-analysis', 'lab-reports',
-    'listings', 'programming-specs', 'protocol', 'qc-documentation', 'safety-tables',
-    'sap-addendum', 'sdtm-specs', 'shells', 'standard-files', 'statistical-plan',
-    'study-data-guide', 'study-design', 'tables', 'validation-reports', 'workflows'
-  ];
-  
   const importedLibraries = [
     { uri: 'https://github.com/merck/standard-macros', refType: 'branch', refValue: 'main', serviceProvider: 'github:Enterprise' }
   ];

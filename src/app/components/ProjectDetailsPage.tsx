@@ -12,8 +12,15 @@ interface ProjectDetailsPageProps {
   onUpdateTeamMembers: (studyId: string, members: TeamMember[]) => void;
 }
 
+type UserDirectoryEntry = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  isid: string;
+};
+
 // Mock user directory
-const USER_DIRECTORY: Record<string, { firstName: string; lastName: string; email: string; isid: string }> = {
+const USER_DIRECTORY: Record<string, UserDirectoryEntry> = {
   'arpitteam@example.com': { firstName: 'Arpit', lastName: 'Team', email: 'arpitteam@example.com', isid: 'ARPITTeam' },
   'ARPITTeam': { firstName: 'Arpit', lastName: 'Team', email: 'arpitteam@example.com', isid: 'ARPITTeam' },
   'arpitusers@example.com': { firstName: 'Arpit', lastName: 'Users', email: 'arpitusers@example.com', isid: 'ARPITUsers' },
@@ -28,6 +35,25 @@ const USER_DIRECTORY: Record<string, { firstName: string; lastName: string; emai
   'UPrakash': { firstName: 'Usha', lastName: 'Prakash', email: 'usha.prakash@example.com', isid: 'UPrakash' },
 };
 
+const SEARCH_BY_OPTIONS = ['Email', 'ISID'];
+const ROLE_OPTIONS: TeamMember['role'][] = ['Statistician', 'Programmer', 'Output Consumer', 'Project Lead'];
+const EMAIL_DIRECTORY_OPTIONS = Object.keys(USER_DIRECTORY).filter((key) => key.includes('@'));
+const ISID_DIRECTORY_OPTIONS = Object.keys(USER_DIRECTORY).filter((key) => !key.includes('@'));
+
+function normalizeSlugValue(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, '-');
+}
+
+function normalizeCompactValue(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, '');
+}
+
+function hasDuplicateTeamMember(members: TeamMember[], user: UserDirectoryEntry): boolean {
+  return members.some(
+    (member) => member.firstName === user.firstName && member.lastName === user.lastName
+  );
+}
+
 function SummaryField({ label, value }: { label: string; value: string | React.ReactNode }) {
   return (
     <div className="mb-4">
@@ -38,13 +64,13 @@ function SummaryField({ label, value }: { label: string; value: string | React.R
 }
 
 function generateProjectName(study: Study): string {
-  const businessArea = study.businessArea.toLowerCase().replace(/\s+/g, '-');
+  const businessArea = normalizeSlugValue(study.businessArea);
   const therapeuticArea = study.therapeuticArea.toLowerCase().substring(0, 3);
   const blinding = study.blublType.toLowerCase().includes('blinded') ? 'bl' : 'unbl';
-  const mkv = study.mkVNumber.toLowerCase().replace(/\s+/g, '');
-  const indication = study.indication.toLowerCase().replace(/\s+/g, '-');
-  const protocol = study.protocolNumber.toLowerCase().replace(/\s+/g, '');
-  const milestone = study.milestoneName.toLowerCase().replace(/\s+/g, '');
+  const mkv = normalizeCompactValue(study.mkVNumber);
+  const indication = normalizeSlugValue(study.indication);
+  const protocol = normalizeCompactValue(study.protocolNumber);
+  const milestone = normalizeCompactValue(study.milestoneName);
   
   return `${businessArea}-${therapeuticArea}-${blinding}-${mkv}-${indication}-${protocol}-${milestone}`;
 }
@@ -76,9 +102,7 @@ export default function ProjectDetailsPage({ study, onNavigate, onUpdateTeamMemb
     }
 
     // Check if user is already added
-    const isDuplicate = teamMembers.some(
-      member => member.firstName === userInfo.firstName && member.lastName === userInfo.lastName
-    );
+    const isDuplicate = hasDuplicateTeamMember(teamMembers, userInfo);
 
     if (isDuplicate) {
       toast.error('This team member has already been added');
@@ -252,7 +276,7 @@ export default function ProjectDetailsPage({ study, onNavigate, onUpdateTeamMemb
                     <label className="block text-foreground text-sm mb-2">Search By:</label>
                     <Select
                       placeholder="Select"
-                      options={['Email', 'ISID']}
+                      options={SEARCH_BY_OPTIONS}
                       value={searchBy}
                       onChange={(value) => {
                         setSearchBy(value);
@@ -265,7 +289,7 @@ export default function ProjectDetailsPage({ study, onNavigate, onUpdateTeamMemb
                   <div className="flex-1">
                     <Select
                       placeholder="Select Email"
-                      options={Object.keys(USER_DIRECTORY).filter(k => k.includes('@'))}
+                      options={EMAIL_DIRECTORY_OPTIONS}
                       value={selectedEmail}
                       onChange={setSelectedEmail}
                       disabled={searchBy !== 'Email'}
@@ -275,7 +299,7 @@ export default function ProjectDetailsPage({ study, onNavigate, onUpdateTeamMemb
                   <div className="flex-1">
                     <Select
                       placeholder="Select ISID"
-                      options={Object.keys(USER_DIRECTORY).filter(k => !k.includes('@'))}
+                      options={ISID_DIRECTORY_OPTIONS}
                       value={selectedISID}
                       onChange={setSelectedISID}
                       disabled={searchBy !== 'ISID'}
@@ -286,7 +310,7 @@ export default function ProjectDetailsPage({ study, onNavigate, onUpdateTeamMemb
                     <label className="block text-foreground text-sm mb-2">Role:</label>
                     <Select
                       placeholder="Select Role"
-                      options={['Statistician', 'Programmer', 'Output Consumer', 'Project Lead']}
+                      options={ROLE_OPTIONS}
                       value={role}
                       onChange={(value) => setRole(value as TeamMember['role'])}
                     />
