@@ -291,6 +291,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
   const [sortConfig, setSortConfig] = useState<SortConfig | null>({ key: 'dateAdded', direction: 'desc' });
   const [selectedTAs, setSelectedTAs] = useState<string[]>([]);
   const [selectedCompounds, setSelectedCompounds] = useState<string[]>([]);
+  const [selectedMKNumbers, setSelectedMKNumbers] = useState<string[]>([]);
   const [selectedProtocols, setSelectedProtocols] = useState<string[]>([]);
 
   // ── TA Leads data ──────────────────────────────────────────────────────
@@ -343,6 +344,10 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
     ...protocolLeads.filter(p => !p.hidden).map(p => p.protocolNumber),
   ])).sort();
 
+  const mkNumbers = Array.from(new Set([
+    ...protocolLeads.filter(p => !p.hidden).map(p => p.mkNumber),
+  ])).sort();
+
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
@@ -373,8 +378,9 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
   const filteredPL = (() => {
     let data = visiblePL;
     if (selectedTAs.length) data = data.filter(r => selectedTAs.includes(r.therapeuticArea));
+    if (selectedMKNumbers.length) data = data.filter(r => selectedMKNumbers.includes(r.mkNumber));
     if (selectedProtocols.length) data = data.filter(r => selectedProtocols.includes(r.protocolNumber));
-    if (searchQuery.trim()) data = searchData(data, searchQuery, ['therapeuticArea', 'protocolNumber', 'isid', 'email', 'department']);
+    if (searchQuery.trim()) data = searchData(data, searchQuery, ['therapeuticArea', 'mkNumber', 'protocolNumber', 'isid', 'email', 'department']);
     if (protocolLeadSortConfig) data = sortData(data, protocolLeadSortConfig);
     return data;
   })();
@@ -386,6 +392,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
 
   const taOptions = uniqueTAs.map(ta => ({ value: ta, label: ta, count: visibleTALeads.filter(t => t.therapeuticArea === ta).length }));
   const compoundOptions = compounds.map(c => ({ value: c, label: c, count: visibleTALeads.filter(t => t.compound === c).length }));
+  const mkNumberOptions = mkNumbers.map(mk => ({ value: mk, label: mk, count: visiblePL.filter(pl => pl.mkNumber === mk).length }));
   const protocolOptions = protocolNumbers.map(p => ({ value: p, label: p, count: visiblePL.filter(pl => pl.protocolNumber === p).length }));
 
   // ── Handlers ─────────────────────────────────────────────────────────────
@@ -519,7 +526,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             {tabs.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => { setActiveTab(tab.id); setSearchQuery(''); setSelectedTAs([]); setSelectedCompounds([]); setSelectedProtocols([]); }}
+                onClick={() => { setActiveTab(tab.id); setSearchQuery(''); setSelectedTAs([]); setSelectedCompounds([]); setSelectedMKNumbers([]); setSelectedProtocols([]); }}
                 className={`flex items-center gap-2 px-6 py-3 border-b-2 transition-colors cursor-pointer border-0 bg-transparent ${
                   activeTab === tab.id
                     ? 'border-primary text-primary'
@@ -564,7 +571,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                   <div className="flex items-center gap-3 mb-4">
                     <SearchBar placeholder="Search therapy leads..." value={searchQuery} onChange={setSearchQuery} className="min-w-[280px]" />
                     <FilterDropdown label="Therapeutic Area" options={taOptions} selectedValues={selectedTAs} onChange={setSelectedTAs} />
-                    <FilterDropdown label="Compound" options={compoundOptions} selectedValues={selectedCompounds} onChange={setSelectedCompounds} />
+                    <FilterDropdown label="MK Number" options={compoundOptions} selectedValues={selectedCompounds} onChange={setSelectedCompounds} />
                     <ExportButton data={filteredTALeads} columns={exportTALeadsColumns} filename="therapy-leads-export" />
                   </div>
 
@@ -673,6 +680,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                   <div className="flex items-center gap-3 mb-4">
                     <SearchBar placeholder="Search project leads..." value={searchQuery} onChange={setSearchQuery} className="min-w-[280px]" />
                     <FilterDropdown label="Therapeutic Area" options={taOptions} selectedValues={selectedTAs} onChange={setSelectedTAs} />
+                    <FilterDropdown label="MK Number" options={mkNumberOptions} selectedValues={selectedMKNumbers} onChange={setSelectedMKNumbers} />
                     <FilterDropdown label="Protocol Number" options={protocolOptions} selectedValues={selectedProtocols} onChange={setSelectedProtocols} />
                     <ExportButton data={filteredPL} columns={exportPLColumns} filename="project-leads-export" />
                   </div>
@@ -807,12 +815,12 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
           <FormField label="Therapeutic Area" required>
             <Select options={therapeuticAreas} value={addTALeadTA} onChange={setAddTALeadTA} placeholder="Select Therapeutic Area" />
           </FormField>
-          <FormField label="Compound (MK Number)" required>
+          <FormField label="MK Number" required>
             <SearchableSelect
               options={compounds}
               value={addTALeadCompound}
               onChange={setAddTALeadCompound}
-              placeholder="Search or select compound..."
+              placeholder="Search or select MK Number..."
             />
           </FormField>
           <FormField label="Search By">

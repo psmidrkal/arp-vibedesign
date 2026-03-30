@@ -24,7 +24,7 @@ export const ROLES: RoleDefinition[] = [
   {
     id: 'ta-lead',
     label: 'Therapy Lead',
-    description: 'Assign project leads to compounds within assigned TAs. View audit trail.',
+    description: 'Assign project leads to MK Numbers within assigned TAs. View audit trail.',
     badgeColor: '#fff',
     badgeBg: '#0369a1',
   },
